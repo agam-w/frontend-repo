@@ -1,5 +1,6 @@
 import { getUserData } from "@/apis/userApi";
 import UserdataForm from "@/components/UserdataForm";
+import StoreProvider from "./StoreProvider";
 
 async function getData() {
   const res = await getUserData();
@@ -17,7 +18,9 @@ export default async function Home() {
   return (
     <div className="container py-12">
       <p className="text-3xl font-bold mb-4">User Data</p>
-      <UserdataForm data={user} />
+      <StoreProvider>
+        <UserdataForm data={user} />
+      </StoreProvider>
     </div>
   );
 }

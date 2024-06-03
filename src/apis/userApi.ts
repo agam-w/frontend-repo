@@ -6,6 +6,12 @@ export type ApiResult<T> = {
   data?: T;
 };
 
+export type ApiError = {
+  code: string;
+  message: string;
+  detail?: string;
+};
+
 export type User = {
   id: string;
   name: string;

@@ -1,10 +1,20 @@
 "use client";
 import { User, updateUserData } from "@/apis/userApi";
-import { TextField } from "@mui/material";
+import { TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import UpdateButton from "./UpdateButton";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  UpdateProcessStatus,
+  setMessage,
+  setStatus,
+} from "@/store/features/updateProcessSlice";
 
 function UserdataForm({ data }: { data?: User }) {
+  const dispatch = useAppDispatch();
+  const status = useAppSelector((state) => state.updateProccess.status);
+  const message = useAppSelector((state) => state.updateProccess.message);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -19,6 +29,8 @@ function UserdataForm({ data }: { data?: User }) {
   }, [data]);
 
   const updateData = async () => {
+    dispatch(setStatus(UpdateProcessStatus.Loading));
+
     const data = {
       name,
       username,
@@ -29,9 +41,13 @@ function UserdataForm({ data }: { data?: User }) {
     await updateUserData(data)
       .then((res) => {
         console.log(res);
+        dispatch(setStatus(UpdateProcessStatus.Success));
+        dispatch(setMessage(res.message));
       })
       .catch((err) => {
         console.error(err);
+        dispatch(setStatus(UpdateProcessStatus.Error));
+        dispatch(setMessage("Error updating data"));
       });
   };
 
@@ -67,7 +83,26 @@ function UserdataForm({ data }: { data?: User }) {
           onChange={(e) => setPhone(e.target.value)}
         />
       </div>
-      <UpdateButton onClick={updateData} />
+
+      <div>
+        {status == UpdateProcessStatus.Loading && (
+          <Typography variant="body1" gutterBottom>
+            Updating ...
+          </Typography>
+        )}
+
+        {status == UpdateProcessStatus.Success ||
+        status == UpdateProcessStatus.Error ? (
+          <Typography variant="body1" gutterBottom>
+            {message}
+          </Typography>
+        ) : null}
+      </div>
+
+      <UpdateButton
+        onClick={updateData}
+        disabled={status == UpdateProcessStatus.Loading}
+      />
     </div>
   );
 }
